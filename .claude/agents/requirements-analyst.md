@@ -34,6 +34,7 @@ Acceptance criteria:
 Rules:
 - Numbering starts at REQ-001 for each feature.
 - Every requirement is testable. Each acceptance criterion states an observable result with specific values, not words like "fast" or "user-friendly".
+- Every assumption that changes observable behavior (rounding, input handling, messages, limits, defaults) must also appear as an acceptance criterion with specific values. Write criteria for the edge cases that pin a rule down: boundaries (e.g. exactly zero), ties (e.g. a value exactly halfway when rounding), and whitespace or format variants. Never write criteria that deliberately avoid those cases.
 - One idea per requirement. Split compound requirements.
 - Cover the business statement fully, and add nothing it doesn't support.
 - No "TBD", "TODO", or "??" anywhere. Unknowns become open questions or stated assumptions.

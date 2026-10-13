@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parent.parent
 FEATURES = ROOT / "docs" / "features"
 FEATURE_NAME = re.compile(r"[a-z][a-z0-9_]*")
 REQ_ID = re.compile(r"REQ-\d{3}")
+# Unfilled template slots like "[desktop window / CLI]" or "<add yours>". "[text](url)" links don't count.
+PLACEHOLDER = re.compile(r"\[[^\]\n]+\](?!\()|<[^<>\n]+>")
+SKIPPED = re.compile(r"\b(\d+) skipped\b")
 
 
 def read(path):
@@ -57,6 +60,11 @@ def run_tests(docs):
     if result.returncode != 0:
         tail = "\n".join(out.strip().splitlines()[-15:])
         return [f"tests did not pass (exit code {result.returncode}):\n{tail}"]
+    # pytest exits 0 when tests are skipped, but a skipped test verified nothing.
+    skipped = SKIPPED.search(out)
+    if skipped:
+        return [f"{skipped.group(1)} test(s) were skipped; a skipped test is not a pass. "
+                f"Run '{cmd} -rs' to see why, and fix the cause (e.g. no display for GUI tests)"]
     return []
 
 
@@ -67,7 +75,11 @@ def gate_business_statement(docs):
         return [f"{rel(path)} does not exist"]
     body = re.sub(r"<!--.*?-->", "", text, flags=re.S)
     words = len(re.findall(r"\w+", body))
-    return [] if words >= 50 else [f"business statement looks unfinished ({words} words; need at least 50)"]
+    problems = [] if words >= 50 else [f"business statement looks unfinished ({words} words; need at least 50)"]
+    problems += [f"unfilled placeholder: {p}" for p in PLACEHOLDER.findall(body)]
+    if re.search(r"\b(TBD|TODO)\b|\?\?", body):
+        problems.append("unresolved TBD/TODO/?? markers remain in the business statement")
+    return problems
 
 
 def gate_requirements(docs):

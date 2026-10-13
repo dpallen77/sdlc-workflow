@@ -23,15 +23,25 @@ Every feature has a short name (lowercase, digits and underscores, e.g. `user_lo
 
 ## Conventions
 - Requirements are numbered `REQ-001`, `REQ-002`, ... within each feature (every feature starts at REQ-001). Each has acceptance criteria numbered `AC-1`, `AC-2`, ...
+- Every assumption that changes observable behavior (rounding, input handling, messages, limits, defaults) also has an acceptance criterion with specific values, including boundary and tie cases. An assumption with no criterion goes untested.
 - A design must mention every `REQ-` ID of its feature and no ID that doesn't exist there.
-- A feature's tests live in `tests/<feature>/`. Test functions are named `test_req_001_<what_it_checks>`, and each requirement has at least one.
 - Tests are written from the acceptance criteria, before or alongside the code, never fitted to the code afterward.
 - The gates run the whole test suite, so a feature can't pass while it breaks another feature's tests.
+- The gates fail if any test is skipped. A skipped test verified nothing.
 - `src/` is shared. Prefer having only one feature in the code stage at a time.
+
+## Code and test layout (designs must follow this, not redefine it)
+- A feature's code lives in its own package, `src/<feature>/`, unless the design reuses or extends an existing package.
+- A feature's tests live in `tests/<feature>/`. Test functions are named `test_req_001_<what_it_checks>`, and each requirement has at least one.
+- `tests/__init__.py` and `tests/<feature>/__init__.py` both exist and are empty. With both present, pytest names the test package `tests.<feature>`, so it never shadows `src/<feature>`, and same-named test files in different features don't collide.
+- `tests/<feature>/conftest.py` puts `<repo>/src` at the front of `sys.path`. Tests import code as `from <feature>.<module> import ...`.
+- No repo-wide pytest config is needed; tests run with the `test_command` in `workflow.json` from the repo root.
 
 ## Project constraints (fill these in)
 - Language and stack: Python 3, standard library where possible
 - Test runner: pytest (command is set in `workflow.json`)
 - Secrets: never commit keys; read them from `.env`
 - Budget / other limits: <add yours>
+
+
 
