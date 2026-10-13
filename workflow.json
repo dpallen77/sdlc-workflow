@@ -1,0 +1,15 @@
+{
+  "test_command": "python3 -m pytest -q",
+  "features": {
+    "inches_to_metric_converter": {
+      "stage": "done",
+      "approved": {
+        "business_statement": true,
+        "requirements": true,
+        "design": true,
+        "code": true,
+        "validation": true
+      }
+    }
+  }
+}
